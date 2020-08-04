@@ -17,16 +17,29 @@ A LibTorch inference implementation of the [yolov5](https://github.com/ultralyti
 
 Please refer to the official document here: https://github.com/ultralytics/yolov5/issues/251
 
-Note that the current export script in [yolov5](https://github.com/ultralytics/yolov5) uses CPU by default,  the "export.py" needs to be modified as following to support GPU (can be found in "utils/export.py"):
+
+
+**Mandatory Update**: developer needs to modify following code from the original [export.py in yolov5](https://github.com/ultralytics/yolov5/blob/master/models/export.py)
+
+```bash
+# line 29
+model.model[-1].export = False
+```
+
+
+
+Note that the current export script in [yolov5](https://github.com/ultralytics/yolov5) uses CPU by default,  the "export.py" needs to be modified as following to support GPU:
 
 ```python
-# line 22
+# line 23
 img = torch.zeros((opt.batch_size, 3, *opt.img_size)).to(device='cuda')  
-# line 26
+# line 27
 model = torch.load(opt.weights, map_location=torch.device('cuda'))['model'].float()
-# line 28
-model.model[-1].export = False  
 ```
+
+
+
+Sample code can be found in [utils/export.py](https://github.com/yasenh/libtorch-yolov5/blob/master/utils/export.py) in this repo.
 
 
 
@@ -61,6 +74,13 @@ $ ./libtorch-yolov5 ../weights/yolov5s_gpu.torchscript.pt ../images/bus.jpg -gpu
 
 
 ![Zidane](images/zidane_out.jpg)
+
+
+
+## FAQ
+
+1. terminate called after throwing an instance of 'c10::Error' what(): isTuple() INTERNAL ASSERT FAILED
+   - Make sure "model.model[-1].export = False" when running export script.
 
 
 
