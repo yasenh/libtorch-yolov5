@@ -147,14 +147,14 @@ torch::Tensor Detector::PostProcessing(const torch::Tensor& detections, float co
     detections.slice(2, 0, 4) = box.slice(2, 0, 4);
 
     bool is_initialized = false;
-    torch::Tensor output = torch::zeros({1, 7});
+    torch::Tensor output = torch::zeros({0, 7});
 
     // iterating all images in the batch
     for (int batch_i = 0; batch_i < batch_size; batch_i++) {
         auto det = torch::masked_select(detections[batch_i], conf_mask[batch_i]).view({-1, num_classes + item_attr_size});
 
         // if none remain then process next image
-        if (det.size(1) == 0) {
+        if (det.size(0) == 0) {
             continue;
         }
 
