@@ -90,4 +90,5 @@ $ ./libtorch-yolov5 ../weights/yolov5s_gpu.torchscript.pt ../images/bus.jpg -gpu
 2. https://github.com/walktree/libtorch-yolov3
 3. https://pytorch.org/cppdocs/index.html
 4. https://github.com/pytorch/vision
+5. [PyTorch.org - CUDA SEMANTICS](https://pytorch.org/docs/stable/notes/cuda.html)
 
