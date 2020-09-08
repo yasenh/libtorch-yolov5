@@ -28,7 +28,7 @@ model.model[-1].export = False
 
 
 
-Note that the current export script in [yolov5](https://github.com/ultralytics/yolov5) uses CPU by default,  the "export.py" needs to be modified as following to support GPU:
+**Add GPU support**: Note that the current export script in [yolov5](https://github.com/ultralytics/yolov5) **uses CPU by default**,  the "export.py" needs to be modified as following to support GPU:
 
 ```python
 # line 28
@@ -57,7 +57,6 @@ $ wget https://download.pytorch.org/libtorch/cu102/libtorch-cxx11-abi-shared-wit
 $ unzip libtorch-cxx11-abi-shared-with-deps-1.6.0.zip
 $ mkdir build && cd build
 $ cmake .. && make
-$ ./libtorch-yolov5 <path-to-exported-script-module> <path-to-image> <-gpu>
 ```
 
 
@@ -66,9 +65,9 @@ To run inference on examples in the `./images` folder:
 
 ```bash
 # CPU
-$ ./libtorch-yolov5 ../weights/yolov5s.torchscript.pt ../images/bus.jpg
+$ ./libtorch-yolov5 --source ../images/bus.jpg --weights ../weights/yolov5s.torchscript.pt --view-img
 # GPU
-$ ./libtorch-yolov5 ../weights/yolov5s_gpu.torchscript.pt ../images/bus.jpg -gpu
+$ ./libtorch-yolov5 --source ../images/bus.jpg --weights ../weights/yolov5s.torchscript.pt --gpu --view-img
 ```
 
 

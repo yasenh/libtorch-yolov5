@@ -72,7 +72,7 @@ int main(int argc, const char* argv[]) {
             ("conf-thres", "object confidence threshold", cxxopts::value<float>()->default_value("0.4"))
             ("iou-thres", "IOU threshold for NMS", cxxopts::value<float>()->default_value("0.5"))
             ("gpu", "Enable cuda device or cpu", cxxopts::value<bool>()->default_value("false"))
-            ("view-img", "display results", cxxopts::value<bool>()->default_value("true"))
+            ("view-img", "display results", cxxopts::value<bool>()->default_value("false"))
             ("h,help", "Print usage");
 
     auto opt = parser.parse(argc, argv);
