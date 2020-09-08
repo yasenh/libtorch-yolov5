@@ -25,6 +25,7 @@ Detector::Detector(const std::string& model_path, const torch::DeviceType& devic
 std::vector<std::tuple<cv::Rect, float, int>>
 Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
     torch::NoGradGuard no_grad;
+    std::cout << "----------New Frame----------" << std::endl;
 
     /*** Pre-process ***/
 
