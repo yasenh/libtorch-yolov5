@@ -8,6 +8,3 @@ enum Det {
     score = 4,
     class_idx = 5
 };
-
-constexpr float kConfThreshold = 0.4;
-constexpr float kIouThreshold = 0.6;

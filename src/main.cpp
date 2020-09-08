@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include "detector.h"
-#include "utils.h"
+#include "cxxopts.hpp"
 
 
 std::vector<std::string> LoadNames(const std::string& path) {
@@ -63,17 +63,27 @@ void Demo(cv::Mat& img,
 
 
 int main(int argc, const char* argv[]) {
-    if (argc != 3 && argc != 4) {
-        std::cerr << "usage: app <path-to-exported-script-module> <path-to-image> <-gpu>\n";
-        std::cerr << "Example: app xxx.pt xxx.jpg -gpu\n";
-        return -1;
+    cxxopts::Options parser(argv[0], "A LibTorch inference implementation of the yolov5");
+
+    // TODO: add other args
+    parser.allow_unrecognised_options().add_options()
+            ("weights", "model.torchscript.pt path", cxxopts::value<std::string>())
+            ("source", "source", cxxopts::value<std::string>())
+            ("conf-thres", "object confidence threshold", cxxopts::value<float>()->default_value("0.4"))
+            ("iou-thres", "IOU threshold for NMS", cxxopts::value<float>()->default_value("0.5"))
+            ("gpu", "Enable cuda device or cpu", cxxopts::value<bool>()->default_value("false"))
+            ("view-img", "display results", cxxopts::value<bool>()->default_value("true"))
+            ("h,help", "Print usage");
+
+    auto opt = parser.parse(argc, argv);
+
+    if (opt.count("help")) {
+        std::cout << parser.help() << std::endl;
+        exit(0);
     }
 
     // check if gpu flag is set
-    bool is_gpu = false;
-    if(argc == 4) {
-        is_gpu = (std::string(argv[3]) == "-gpu");
-    }
+    bool is_gpu = opt["gpu"].as<bool>();
 
     // set device type - CPU/GPU
     torch::DeviceType device_type;
@@ -90,18 +100,24 @@ int main(int argc, const char* argv[]) {
     }
 
     // load input image
-    cv::Mat img = cv::imread(argv[2]);
+    std::string source = opt["source"].as<std::string>();
+    cv::Mat img = cv::imread(source);
     if (img.empty()) {
         std::cerr << "Error loading the image!\n";
         return -1;
     }
 
     // load network
-    auto detector = Detector(argv[1], device_type);
+    std::string weights = opt["weights"].as<std::string>();
+    auto detector = Detector(weights, device_type);
 
     // inference
-    auto result = detector.Run(img, kConfThreshold, kIouThreshold);
+    float conf_thres = opt["conf-thres"].as<float>();
+    float iou_thres = opt["iou-thres"].as<float>();
+    auto result = detector.Run(img, conf_thres, iou_thres);
 
     // visualize detections
-    Demo(img, result, class_names);
+    if (opt["view-img"].as<bool>()) {
+        Demo(img, result, class_names);
+    }
 }
