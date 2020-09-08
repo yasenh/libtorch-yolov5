@@ -9,7 +9,7 @@ A LibTorch inference implementation of the [yolov5](https://github.com/ultralyti
 - Ubuntu 16.04
 - CUDA 10.2
 - OpenCV 4.1.0
-- LibTorch 1.5.1
+- LibTorch 1.6.0
 
 
 
@@ -31,15 +31,21 @@ model.model[-1].export = False
 Note that the current export script in [yolov5](https://github.com/ultralytics/yolov5) uses CPU by default,  the "export.py" needs to be modified as following to support GPU:
 
 ```python
-# line 23
+# line 28
 img = torch.zeros((opt.batch_size, 3, *opt.img_size)).to(device='cuda')  
-# line 27
-model = torch.load(opt.weights, map_location=torch.device('cuda'))['model'].float()
+# line 31
+model = attempt_load(opt.weights, map_location=torch.device('cuda'))
 ```
 
 
 
-Sample code can be found in [utils/export.py](https://github.com/yasenh/libtorch-yolov5/blob/master/utils/export.py) in this repo.
+Export a trained yolov5 model:
+
+```bash
+cd yolov5
+export PYTHONPATH="$PWD"  # add path
+python models/export.py --weights yolov5s.pt --img 640 --batch 1  # export
+```
 
 
 
@@ -47,8 +53,8 @@ Sample code can be found in [utils/export.py](https://github.com/yasenh/libtorch
 
 ```bash
 $ cd /path/to/libtorch-yolo5
-$ wget https://download.pytorch.org/libtorch/cu102/libtorch-cxx11-abi-shared-with-deps-1.5.1.zip
-$ unzip libtorch-cxx11-abi-shared-with-deps-1.5.1.zip
+$ wget https://download.pytorch.org/libtorch/cu102/libtorch-cxx11-abi-shared-with-deps-1.6.0.zip
+$ unzip libtorch-cxx11-abi-shared-with-deps-1.6.0.zip
 $ mkdir build && cd build
 $ cmake .. && make
 $ ./libtorch-yolov5 <path-to-exported-script-module> <path-to-image> <-gpu>
