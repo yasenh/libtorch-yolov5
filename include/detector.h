@@ -53,4 +53,5 @@ private:
 
     torch::jit::script::Module module_;
     torch::Device device_;
+    bool half_;
 };

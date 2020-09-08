@@ -11,7 +11,13 @@ Detector::Detector(const std::string& model_path, const torch::DeviceType& devic
         std::exit(EXIT_FAILURE);
     }
 
+    half_ = (device_ != torch::kCPU);
     module_.to(device_);
+
+    if (half_) {
+        module_.to(torch::kHalf);
+    }
+
     module_.eval();
 }
 
@@ -19,6 +25,10 @@ Detector::Detector(const std::string& model_path, const torch::DeviceType& devic
 std::vector<std::tuple<cv::Rect, float, int>>
 Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
     torch::NoGradGuard no_grad;
+
+    /*** Pre-process ***/
+
+    auto start = std::chrono::high_resolution_clock::now();
 
     // keep the original image for visualization purpose
     cv::Mat img_input = img.clone();
@@ -30,13 +40,36 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
     cv::cvtColor(img_input, img_input, cv::COLOR_BGR2RGB);  // BGR -> RGB
     img_input.convertTo(img_input, CV_32FC3, 1.0f / 255.0f);  // normalization 1/255
     auto tensor_img = torch::from_blob(img_input.data, {1, img_input.rows, img_input.cols, img_input.channels()}).to(device_);
+
     tensor_img = tensor_img.permute({0, 3, 1, 2}).contiguous();  // BHWC -> BCHW (Batch, Channel, Height, Width)
+
+    if (half_) {
+        tensor_img = tensor_img.to(torch::kHalf);
+    }
 
     std::vector<torch::jit::IValue> inputs;
     inputs.emplace_back(tensor_img);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    // It should be known that it takes longer time at first time
+    std::cout << "pre-process takes : " << duration.count() << " ms" << std::endl;
+
+    /*** Inference ***/
+
+    start = std::chrono::high_resolution_clock::now();
+
     // inference
     torch::jit::IValue output = module_.forward(inputs);
 
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    // It should be known that it takes longer time at first time
+    std::cout << "inference takes : " << duration.count() << " ms" << std::endl;
+
+    /*** Post-process ***/
+
+    start = std::chrono::high_resolution_clock::now();
     auto detections = output.toTuple()->elements()[0].toTensor();
 
     // result: n * 7
@@ -62,6 +95,11 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
         std::tuple<cv::Rect, float, int> t = std::make_tuple(rect, demo_data[i][Det::score], demo_data[i][Det::class_idx]);
         demo_data_vec.emplace_back(t);
     }
+
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    // It should be known that it takes longer time at first time
+    std::cout << "post-process takes : " << duration.count() << " ms" << std::endl;
 
     return demo_data_vec;
 }
