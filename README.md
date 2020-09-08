@@ -68,6 +68,8 @@ To run inference on examples in the `./images` folder:
 $ ./libtorch-yolov5 --source ../images/bus.jpg --weights ../weights/yolov5s.torchscript.pt --view-img
 # GPU
 $ ./libtorch-yolov5 --source ../images/bus.jpg --weights ../weights/yolov5s.torchscript.pt --gpu --view-img
+# Profiling
+$ CUDA_LAUNCH_BLOCKING=1 ./libtorch-yolov5 --source ../images/bus.jpg --weights ../weights/yolov5s.torchscript.pt --gpu --view-img
 ```
 
 
@@ -87,6 +89,9 @@ $ ./libtorch-yolov5 --source ../images/bus.jpg --weights ../weights/yolov5s.torc
 1. terminate called after throwing an instance of 'c10::Error' what(): isTuple() INTERNAL ASSERT FAILED
    - Make sure "model.model[-1].export = False" when running export script.
 
+2. Why the "inference takes" so long from the log?
+   - It may take longer time for the first cycle. The [yolov5 python version](https://github.com/ultralytics/yolov5) run the inference once with an empty image before the actual detection pipeline. User can modify the code to process the same image multiple times or process a video to get the valid processing time.
+
 
 
 ## References
@@ -96,4 +101,5 @@ $ ./libtorch-yolov5 --source ../images/bus.jpg --weights ../weights/yolov5s.torc
 3. https://pytorch.org/cppdocs/index.html
 4. https://github.com/pytorch/vision
 5. [PyTorch.org - CUDA SEMANTICS](https://pytorch.org/docs/stable/notes/cuda.html)
+6. [PyTorch.org - add synchronization points](https://discuss.pytorch.org/t/why-is-the-const-time-with-fp32-and-fp16-almost-the-same-in-libtorchs-forward/45792/5)
 
