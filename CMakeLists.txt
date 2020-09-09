@@ -19,7 +19,7 @@ else ()
 endif()
 
 set(Torch_DIR libtorch/share/cmake/Torch)
-find_package(Torch REQUIRED)
+find_package(Torch PATHS ${Torch_DIR} NO_DEFAULT REQUIRED)
 if (Torch_FOUND)
     message(STATUS "Torch library found!")
     message(STATUS "    include path: ${TORCH_INCLUDE_DIRS}" \n)
