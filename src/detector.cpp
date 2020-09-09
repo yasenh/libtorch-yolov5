@@ -28,7 +28,8 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
     std::cout << "----------New Frame----------" << std::endl;
 
     /*** Pre-process ***/
-
+    at::cuda::CUDAStream stream = at::cuda::getCurrentCUDAStream();
+    AT_CUDA_CHECK(cudaStreamSynchronize(stream));
     auto start = std::chrono::high_resolution_clock::now();
 
     // keep the original image for visualization purpose
@@ -51,6 +52,7 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
     std::vector<torch::jit::IValue> inputs;
     inputs.emplace_back(tensor_img);
 
+    AT_CUDA_CHECK(cudaStreamSynchronize(stream));
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     // It should be known that it takes longer time at first time
@@ -58,11 +60,13 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
 
     /*** Inference ***/
 
+    AT_CUDA_CHECK(cudaStreamSynchronize(stream));
     start = std::chrono::high_resolution_clock::now();
 
     // inference
     torch::jit::IValue output = module_.forward(inputs);
 
+    AT_CUDA_CHECK(cudaStreamSynchronize(stream));
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     // It should be known that it takes longer time at first time
@@ -70,6 +74,7 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
 
     /*** Post-process ***/
 
+    AT_CUDA_CHECK(cudaStreamSynchronize(stream));
     start = std::chrono::high_resolution_clock::now();
     auto detections = output.toTuple()->elements()[0].toTensor();
 
@@ -97,6 +102,7 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
         demo_data_vec.emplace_back(t);
     }
 
+    AT_CUDA_CHECK(cudaStreamSynchronize(stream));
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     // It should be known that it takes longer time at first time

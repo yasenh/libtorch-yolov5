@@ -114,10 +114,13 @@ int main(int argc, const char* argv[]) {
     // inference
     float conf_thres = opt["conf-thres"].as<float>();
     float iou_thres = opt["iou-thres"].as<float>();
-    auto result = detector.Run(img, conf_thres, iou_thres);
 
-    // visualize detections
-    if (opt["view-img"].as<bool>()) {
-        Demo(img, result, class_names);
+    for (int i = 0; i < 10; i++) {
+        auto result = detector.Run(img, conf_thres, iou_thres);
     }
+
+//    // visualize detections
+//    if (opt["view-img"].as<bool>()) {
+//        Demo(img, result, class_names);
+//    }
 }

@@ -4,6 +4,7 @@
 
 #include <torch/script.h>
 #include <torch/torch.h>
+#include <ATen/CUDAType.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
