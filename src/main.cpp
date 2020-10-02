@@ -111,6 +111,11 @@ int main(int argc, const char* argv[]) {
     std::string weights = opt["weights"].as<std::string>();
     auto detector = Detector(weights, device_type);
 
+    // run once to warm up
+    std::cout << "Run once on empty image" << std::endl;
+    auto temp_img = cv::Mat::zeros(img.rows, img.cols, CV_32F);
+    detector.Run(img, 1.0f, 1.0f);
+
     // inference
     float conf_thres = opt["conf-thres"].as<float>();
     float iou_thres = opt["iou-thres"].as<float>();
