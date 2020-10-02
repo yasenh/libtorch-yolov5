@@ -26,14 +26,13 @@ std::vector<std::string> LoadNames(const std::string& path) {
 
 
 void Demo(cv::Mat& img,
-        const std::vector<std::tuple<cv::Rect, float, int>>& data_vec,
+        const std::vector<Detection>& detections,
         const std::vector<std::string>& class_names,
         bool label = true) {
-    for (const auto & data : data_vec) {
-        cv::Rect box;
-        float score;
-        int class_idx;
-        std::tie(box, score, class_idx) = data;
+    for (const auto& detection : detections) {
+        const auto& box = detection.bbox;
+        float score = detection.score;
+        int class_idx = detection.class_idx;
 
         cv::rectangle(img, box, cv::Scalar(0, 0, 255), 2);
 
@@ -116,13 +115,18 @@ int main(int argc, const char* argv[]) {
     auto temp_img = cv::Mat::zeros(img.rows, img.cols, CV_32F);
     detector.Run(img, 1.0f, 1.0f);
 
-    // inference
+    // set up threshold
     float conf_thres = opt["conf-thres"].as<float>();
     float iou_thres = opt["iou-thres"].as<float>();
+
+    // inference
     auto result = detector.Run(img, conf_thres, iou_thres);
 
     // visualize detections
     if (opt["view-img"].as<bool>()) {
         Demo(img, result, class_names);
     }
+
+    cv::destroyAllWindows();
+    return 0;
 }
