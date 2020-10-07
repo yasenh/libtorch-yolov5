@@ -87,9 +87,13 @@ $ CUDA_LAUNCH_BLOCKING=1 ./libtorch-yolov5 --source ../images/bus.jpg --weights 
 ## FAQ
 
 1. terminate called after throwing an instance of 'c10::Error' what(): isTuple() INTERNAL ASSERT FAILED
-   - Make sure "model.model[-1].export = False" when running export script.
+   
+- Make sure "model.model[-1].export = False" when running export script.
+   
+2. Why the first "inference takes" so long from the log?
 
-2. Why the "inference takes" so long from the log?
+   - The first inference is slower as well due to the initial optimization that the JIT (Just-in-time compilation) is doing on your code. This is similar to "warm up" in other JIT compilers. Typically, production services will warm up a model using representative inputs before marking it as available.
+
    - It may take longer time for the first cycle. The [yolov5 python version](https://github.com/ultralytics/yolov5) run the inference once with an empty image before the actual detection pipeline. User can modify the code to process the same image multiple times or process a video to get the valid processing time.
 
 
@@ -102,4 +106,5 @@ $ CUDA_LAUNCH_BLOCKING=1 ./libtorch-yolov5 --source ../images/bus.jpg --weights 
 4. https://github.com/pytorch/vision
 5. [PyTorch.org - CUDA SEMANTICS](https://pytorch.org/docs/stable/notes/cuda.html)
 6. [PyTorch.org - add synchronization points](https://discuss.pytorch.org/t/why-is-the-const-time-with-fp32-and-fp16-almost-the-same-in-libtorchs-forward/45792/5)
+7. [PyTorch - why first inference is slower](https://github.com/pytorch/pytorch/issues/2694)
 
