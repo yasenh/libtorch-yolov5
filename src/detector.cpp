@@ -159,48 +159,50 @@ torch::Tensor Detector::GetBoundingBoxIoU(const torch::Tensor& box1, const torch
 torch::Tensor Detector::PostProcessing(const torch::Tensor& detections, float conf_thres, float iou_thres) {
     constexpr int item_attr_size = 5;
     int batch_size = detections.size(0);
-    auto num_classes = detections.size(2) - item_attr_size;  // 80 for coco dataset
+    // number of classes, e.g. 80 for coco dataset
+    auto num_classes = detections.size(2) - item_attr_size;
 
     // get candidates which object confidence > threshold
     auto conf_mask = detections.select(2, 4).ge(conf_thres).unsqueeze(2);
 
-    // compute overall score = obj_conf * cls_conf, similar to x[:, 5:] *= x[:, 4:5]
-    detections.slice(2, item_attr_size, item_attr_size + num_classes) *=
-            detections.select(2, 4).unsqueeze(2);
-
-    // convert bounding box format from (center x, center y, width, height) to (x1, y1, x2, y2)
-    torch::Tensor box = torch::zeros(detections.sizes(), detections.options());
-    box.select(2, Det::tl_x) = detections.select(2, 0) - detections.select(2, 2).div(2);
-    box.select(2, Det::tl_y) = detections.select(2, 1) - detections.select(2, 3).div(2);
-    box.select(2, Det::br_x) = detections.select(2, 0) + detections.select(2, 2).div(2);
-    box.select(2, Det::br_y) = detections.select(2, 1) + detections.select(2, 3).div(2);
-    detections.slice(2, 0, 4) = box.slice(2, 0, 4);
+    // TODO: implement
+    std::vector<Detection> output2;
+    output2.reserve(batch_size);
 
     bool is_initialized = false;
     torch::Tensor output = torch::zeros({0, 7});
 
+    // TODO: implement above
+
     // iterating all images in the batch
     for (int batch_i = 0; batch_i < batch_size; batch_i++) {
+        // apply constrains to get filtered detections for current image
         auto det = torch::masked_select(detections[batch_i], conf_mask[batch_i]).view({-1, num_classes + item_attr_size});
 
-        // if none remain then process next image
-        if (det.size(0) == 0) {
+        // if none detections remain then skip and start to process next image
+        if (0 == det.size(0)) {
             continue;
         }
 
-        // get the max classes score at each result (e.g. elements 5-84)
-        std::tuple<torch::Tensor, torch::Tensor> max_classes = torch::max(det.slice(1, item_attr_size, item_attr_size + num_classes), 1);
+        // compute overall score = obj_conf * cls_conf, similar to x[:, 5:] *= x[:, 4:5]
+        det.slice(1, item_attr_size, item_attr_size + num_classes) *= det.select(1, 4).unsqueeze(1);
+
+        // box (center x, center y, width, height) to (x1, y1, x2, y2)
+        torch::Tensor box = xywh2xyxy(det);
+
+        // [best class only] get the max classes score at each result (e.g. elements 5-84)
+        std::tuple<torch::Tensor, torch::Tensor> max_classes = torch::max(box.slice(1, item_attr_size, item_attr_size + num_classes), 1);
 
         // class score
         auto max_conf_score = std::get<0>(max_classes);
         // index
         auto max_conf_index = std::get<1>(max_classes);
 
-        max_conf_score = max_conf_score.to(torch::kFloat32).unsqueeze(1);
-        max_conf_index = max_conf_index.to(torch::kFloat32).unsqueeze(1);
+        max_conf_score = max_conf_score.to(torch::kFloat).unsqueeze(1);
+        max_conf_index = max_conf_index.to(torch::kFloat).unsqueeze(1);
 
         // shape: n * 6, top-left x/y (0,1), bottom-right x/y (2,3), score(4), class index(5)
-        det = torch::cat({det.slice(1, 0, 4), max_conf_score, max_conf_index}, 1);
+        det = torch::cat({box.slice(1, 0, 4), max_conf_score, max_conf_index}, 1);
 
         // get unique classes
         std::vector<torch::Tensor> img_classes;
@@ -289,4 +291,15 @@ std::vector<Detection> Detector::ScaleCoordinates(const at::TensorAccessor<float
         detections.emplace_back(detection);
     }
     return detections;
+}
+
+
+torch::Tensor Detector::xywh2xyxy(const torch::Tensor& x) {
+    auto y = torch::zeros_like(x);
+    // convert bounding box format from (center x, center y, width, height) to (x1, y1, x2, y2)
+    y.select(1, Det::tl_x) = x.select(1, 0) - x.select(1, 2).div(2);
+    y.select(1, Det::tl_y) = x.select(1, 1) - x.select(1, 3).div(2);
+    y.select(1, Det::br_x) = x.select(1, 0) + x.select(1, 2).div(2);
+    y.select(1, Det::br_y) = x.select(1, 1) + x.select(1, 3).div(2);
+    return y;
 }
