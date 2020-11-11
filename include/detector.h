@@ -66,6 +66,9 @@ private:
     static std::vector<Detection> ScaleCoordinates(const at::TensorAccessor<float, 2>& data,
                                                    float pad_w, float pad_h, float scale, const cv::Size& img_shape);
 
+
+    static torch::Tensor xywh2xyxy(const torch::Tensor& x);
+
     torch::jit::script::Module module_;
     torch::Device device_;
     bool half_;
