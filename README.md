@@ -8,7 +8,7 @@ A LibTorch inference implementation of the [yolov5](https://github.com/ultralyti
 
 - Ubuntu 16.04
 - CUDA 10.2
-- OpenCV 4.1.0
+- OpenCV 3.4.12
 - LibTorch 1.6.0
 
 
@@ -89,7 +89,7 @@ $ CUDA_LAUNCH_BLOCKING=1 ./libtorch-yolov5 --source ../images/bus.jpg --weights 
 1. terminate called after throwing an instance of 'c10::Error' what(): isTuple() INTERNAL ASSERT FAILED
    
 - Make sure "model.model[-1].export = False" when running export script.
-   
+  
 2. Why the first "inference takes" so long from the log?
 
    - The first inference is slower as well due to the initial optimization that the JIT (Just-in-time compilation) is doing on your code. This is similar to "warm up" in other JIT compilers. Typically, production services will warm up a model using representative inputs before marking it as available.
@@ -98,13 +98,18 @@ $ CUDA_LAUNCH_BLOCKING=1 ./libtorch-yolov5 --source ../images/bus.jpg --weights 
 
 
 
+
+
+
+
 ## References
 
 1. https://github.com/ultralytics/yolov5
-2. https://github.com/walktree/libtorch-yolov3
-3. https://pytorch.org/cppdocs/index.html
-4. https://github.com/pytorch/vision
-5. [PyTorch.org - CUDA SEMANTICS](https://pytorch.org/docs/stable/notes/cuda.html)
-6. [PyTorch.org - add synchronization points](https://discuss.pytorch.org/t/why-is-the-const-time-with-fp32-and-fp16-almost-the-same-in-libtorchs-forward/45792/5)
-7. [PyTorch - why first inference is slower](https://github.com/pytorch/pytorch/issues/2694)
+2. [Question about the code in non_max_suppression](https://github.com/ultralytics/yolov5/issues/422)
+3. https://github.com/walktree/libtorch-yolov3
+4. https://pytorch.org/cppdocs/index.html
+5. https://github.com/pytorch/vision
+6. [PyTorch.org - CUDA SEMANTICS](https://pytorch.org/docs/stable/notes/cuda.html)
+7. [PyTorch.org - add synchronization points](https://discuss.pytorch.org/t/why-is-the-const-time-with-fp32-and-fp16-almost-the-same-in-libtorchs-forward/45792/5)
+8. [PyTorch - why first inference is slower](https://github.com/pytorch/pytorch/issues/2694)
 
