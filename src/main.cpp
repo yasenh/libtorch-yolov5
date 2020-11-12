@@ -124,7 +124,7 @@ int main(int argc, const char* argv[]) {
 
     // visualize detections
     if (opt["view-img"].as<bool>()) {
-        Demo(img, result, class_names);
+        Demo(img, result[0], class_names);
     }
 
     cv::destroyAllWindows();
