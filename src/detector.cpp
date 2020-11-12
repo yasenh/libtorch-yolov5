@@ -188,10 +188,10 @@ torch::Tensor Detector::PostProcessing(const torch::Tensor& detections, float co
         det.slice(1, item_attr_size, item_attr_size + num_classes) *= det.select(1, 4).unsqueeze(1);
 
         // box (center x, center y, width, height) to (x1, y1, x2, y2)
-        torch::Tensor box = xywh2xyxy(det);
+        torch::Tensor box = xywh2xyxy(det.slice(1, 0, 4));
 
         // [best class only] get the max classes score at each result (e.g. elements 5-84)
-        std::tuple<torch::Tensor, torch::Tensor> max_classes = torch::max(box.slice(1, item_attr_size, item_attr_size + num_classes), 1);
+        std::tuple<torch::Tensor, torch::Tensor> max_classes = torch::max(det.slice(1, item_attr_size, item_attr_size + num_classes), 1);
 
         // class score
         auto max_conf_score = std::get<0>(max_classes);
