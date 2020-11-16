@@ -46,6 +46,8 @@ private:
 
     /***
      * @brief Performs Non-Maximum Suppression (NMS) on inference results
+     * @note For 640x640 image, 640 / 32(max stride) = 20, sum up boxes from each yolo layer with stride (8, 16, 32) and
+     *       3 scales at each layer, we can get total number of boxes - (20x20 + 40x40 + 80x80) x 3 = 25200
      * @param detections - inference results from the network, example [1, 25200, 85], 85 = 4(xywh) + 1(obj conf) + 80(class score)
      * @param conf_thres - object confidence(objectness) threshold
      * @param iou_thres - IoU threshold for NMS algorithm
