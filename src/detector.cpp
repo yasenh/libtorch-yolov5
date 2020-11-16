@@ -79,9 +79,6 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
     // batch index(0), top-left x/y (1,2), bottom-right x/y (3,4), score(5), class id(6)
     auto result = PostProcessing(detections, pad_w, pad_h, scale, img.size(), conf_threshold, iou_threshold);
 
-//    // remap to original image and list bounding boxes for debugging purpose
-//    std::vector<Detection> det = ScaleCoordinates(data.accessor<float, 2>(), );
-
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     // It should be known that it takes longer time at first time

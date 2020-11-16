@@ -101,6 +101,10 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
+    // load network
+    std::string weights = opt["weights"].as<std::string>();
+    auto detector = Detector(weights, device_type);
+
     // load input image
     std::string source = opt["source"].as<std::string>();
     cv::Mat img = cv::imread(source);
@@ -109,14 +113,10 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
-    // load network
-    std::string weights = opt["weights"].as<std::string>();
-    auto detector = Detector(weights, device_type);
-
     // run once to warm up
     std::cout << "Run once on empty image" << std::endl;
-    auto temp_img = cv::Mat::zeros(img.rows, img.cols, CV_32F);
-    detector.Run(img, 1.0f, 1.0f);
+    auto temp_img = cv::Mat::zeros(img.rows, img.cols, CV_32FC3);
+    detector.Run(temp_img, 1.0f, 1.0f);
 
     // set up threshold
     float conf_thres = opt["conf-thres"].as<float>();
