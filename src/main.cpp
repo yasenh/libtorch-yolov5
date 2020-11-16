@@ -26,32 +26,35 @@ std::vector<std::string> LoadNames(const std::string& path) {
 
 
 void Demo(cv::Mat& img,
-        const std::vector<Detection>& detections,
+        const std::vector<std::vector<Detection>>& detections,
         const std::vector<std::string>& class_names,
         bool label = true) {
-    for (const auto& detection : detections) {
-        const auto& box = detection.bbox;
-        float score = detection.score;
-        int class_idx = detection.class_idx;
+    if (detections.size() > 0)
+    {
+        for (const auto& detection : detections[0]) {
+            const auto& box = detection.bbox;
+            float score = detection.score;
+            int class_idx = detection.class_idx;
 
-        cv::rectangle(img, box, cv::Scalar(0, 0, 255), 2);
+            cv::rectangle(img, box, cv::Scalar(0, 0, 255), 2);
 
-        if (label) {
-            std::stringstream ss;
-            ss << std::fixed << std::setprecision(2) << score;
-            std::string s = class_names[class_idx] + " " + ss.str();
+            if (label) {
+                std::stringstream ss;
+                ss << std::fixed << std::setprecision(2) << score;
+                std::string s = class_names[class_idx] + " " + ss.str();
 
-            auto font_face = cv::FONT_HERSHEY_DUPLEX;
-            auto font_scale = 1.0;
-            int thickness = 1;
-            int baseline=0;
-            auto s_size = cv::getTextSize(s, font_face, font_scale, thickness, &baseline);
-            cv::rectangle(img,
-                    cv::Point(box.tl().x, box.tl().y - s_size.height - 5),
-                    cv::Point(box.tl().x + s_size.width, box.tl().y),
-                    cv::Scalar(0, 0, 255), -1);
-            cv::putText(img, s, cv::Point(box.tl().x, box.tl().y - 5),
-                        font_face , font_scale, cv::Scalar(255, 255, 255), thickness);
+                auto font_face = cv::FONT_HERSHEY_DUPLEX;
+                auto font_scale = 1.0;
+                int thickness = 1;
+                int baseline=0;
+                auto s_size = cv::getTextSize(s, font_face, font_scale, thickness, &baseline);
+                cv::rectangle(img,
+                        cv::Point(box.tl().x, box.tl().y - s_size.height - 5),
+                        cv::Point(box.tl().x + s_size.width, box.tl().y),
+                        cv::Scalar(0, 0, 255), -1);
+                cv::putText(img, s, cv::Point(box.tl().x, box.tl().y - 5),
+                            font_face , font_scale, cv::Scalar(255, 255, 255), thickness);
+            }
         }
     }
 
@@ -124,7 +127,7 @@ int main(int argc, const char* argv[]) {
 
     // visualize detections
     if (opt["view-img"].as<bool>()) {
-        Demo(img, result[0], class_names);
+        Demo(img, result, class_names);
     }
 
     cv::destroyAllWindows();
