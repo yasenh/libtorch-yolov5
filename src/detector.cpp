@@ -35,6 +35,7 @@ Detector::Run(const cv::Mat& img, float conf_threshold, float iou_threshold) {
 
     // keep the original image for visualization purpose
     cv::Mat img_input = img.clone();
+
     std::vector<float> pad_info = LetterboxImage(img_input, img_input, cv::Size(640, 640));
     const float pad_w = pad_info[0];
     const float pad_h = pad_info[1];
@@ -106,7 +107,7 @@ std::vector<float> Detector::LetterboxImage(const cv::Mat& src, cv::Mat& dst, co
     int left = (static_cast<int>(out_w)- mid_w) / 2;
     int right = (static_cast<int>(out_w)- mid_w + 1) / 2;
 
-    cv::copyMakeBorder(dst, dst, top, down, left, right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+    cv::copyMakeBorder(dst, dst, top, down, left, right, cv::BORDER_CONSTANT, cv::Scalar(114, 114, 114));
 
     std::vector<float> pad_info{static_cast<float>(left), static_cast<float>(top), scale};
     return pad_info;
