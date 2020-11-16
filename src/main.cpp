@@ -29,8 +29,8 @@ void Demo(cv::Mat& img,
         const std::vector<std::vector<Detection>>& detections,
         const std::vector<std::string>& class_names,
         bool label = true) {
-    if (detections.size() > 0)
-    {
+
+    if (!detections.empty()) {
         for (const auto& detection : detections[0]) {
             const auto& box = detection.bbox;
             float score = detection.score;
