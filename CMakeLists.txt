@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(libtorch-yolov5)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
+set(CMAKE_CXX_STANDARD 14)
+# It prevents the decay to C++98 when the compiler does not support C++14
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# It disables the use of compiler-specific extensions
+# e.g. -std=c++14 rather than -std=gnu++14
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Try to find OpenCV
 # set(OpenCV_DIR ....)
